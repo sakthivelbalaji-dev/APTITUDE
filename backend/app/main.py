@@ -39,6 +39,11 @@ app.include_router(questions.router)
 app.include_router(students_admin.router)
 
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "capgemini-aptitude-api"}
+
+
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "service": "capgemini-aptitude-api"}
+    return {"status": "healthy", "service": "capgemini-aptitude-api"}
