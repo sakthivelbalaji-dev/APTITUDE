@@ -7,6 +7,8 @@ COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
 
 COPY frontend/ .
+# Build with empty API URL for same-domain deployment
+ENV VITE_API_URL=""
 RUN npm run build
 
 # Build backend with frontend static files
