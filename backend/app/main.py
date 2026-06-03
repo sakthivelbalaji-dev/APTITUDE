@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import Base, engine
@@ -53,19 +54,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(admin.router)
-app.include_router(student.router)
-app.include_router(test.router)
-app.include_router(result.router)
-app.include_router(questions.router)
-app.include_router(students_admin.router)
+app.include_router(admin.router, prefix="/api")
+app.include_router(student.router, prefix="/api")
+app.include_router(test.router, prefix="/api")
+app.include_router(result.router, prefix="/api")
+app.include_router(questions.router, prefix="/api")
+app.include_router(students_admin.router, prefix="/api")
 
 
-@app.get("/")
-def root():
+@app.get("/api")
+def api_root():
     return {"status": "ok", "service": "capgemini-aptitude-api"}
 
 
-@app.get("/health")
+@app.get("/api/health")
 def health_check():
     return {"status": "healthy", "service": "capgemini-aptitude-api"}
+
+
+# Serve static files from frontend build (must be last)
+if os.path.exists("static"):
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")
