@@ -5,10 +5,10 @@ WORKDIR /app
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
-COPY package.json package-lock.json* ./
+COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
 
-COPY . .
+COPY frontend/ .
 RUN npm run build
 
 FROM node:20-alpine
