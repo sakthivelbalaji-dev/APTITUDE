@@ -1,4 +1,6 @@
 import os
+import sys
+import traceback
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -9,15 +11,30 @@ from app.database import Base, engine
 from app.routers import admin, student, test, result, questions, students_admin
 from app.seed import seed_database
 
+print("=" * 50)
 print("Starting FastAPI...")
 print(f"Port: {os.getenv('PORT', '8000')}")
 print(f"Database URL configured: {bool(settings.DATABASE_URL)}")
+print(f"DATABASE_URL: {settings.DATABASE_URL[:20]}..." if settings.DATABASE_URL else "DATABASE_URL: NOT SET")
+print("=" * 50)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
-    seed_database()
+    try:
+        print("Creating database tables...")
+        Base.metadata.create_all(bind=engine)
+        print("Database tables created successfully")
+        
+        print("Seeding database...")
+        seed_database()
+        print("Database seeded successfully")
+    except Exception as e:
+        print(f"ERROR during database initialization: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
+        print("Application will start anyway, but database operations may fail")
+    
+    print("FastAPI application started successfully")
     yield
 
 
