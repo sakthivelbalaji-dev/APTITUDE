@@ -1,0 +1,11 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[build.buildArgs]
+VITE_API_URL = "${{BACKEND_URL}}"
+
+[deploy]
+startCommand = "serve -s dist -l $PORT"
+healthcheckPath = "/"
+restartPolicyType = "ON_FAILURE"
