@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -7,6 +8,10 @@ from app.config import settings
 from app.database import Base, engine
 from app.routers import admin, student, test, result, questions, students_admin
 from app.seed import seed_database
+
+print("Starting FastAPI...")
+print(f"Port: {os.getenv('PORT', '8000')}")
+print(f"Database URL configured: {bool(settings.DATABASE_URL)}")
 
 
 @asynccontextmanager
