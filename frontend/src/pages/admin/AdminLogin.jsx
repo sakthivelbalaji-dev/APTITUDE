@@ -26,7 +26,7 @@ export default function AdminLogin() {
 
   return (
     <PageLayout>
-      <h1 className="text-2xl font-bold text-center mb-2">
+      <h1 className="text-2xl font-bold text-center mb-2 gradient-text animate-scale-3d">
         Capgemini Assessment Management System
       </h1>
       <p className="text-center text-slate-400 mb-8">Admin Login</p>
@@ -45,7 +45,7 @@ export default function AdminLogin() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required
           />
-          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+          {error && <p className="text-red-400 text-sm mb-4 animate-fade-in">{error}</p>}
           <Button type="submit" disabled={loading}>
             {loading ? 'Signing in...' : 'Login'}
           </Button>

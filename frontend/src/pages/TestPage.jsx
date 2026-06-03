@@ -97,10 +97,10 @@ export default function TestPage() {
 
   return (
     <div className="min-h-screen bg-capgemini-dark flex flex-col fixed inset-0 z-50">
-      <header className="px-4 py-3 bg-capgemini-card border-b border-capgemini-border shrink-0">
+      <header className="px-4 py-3 glass border-b border-capgemini-border shrink-0">
         <div className="flex items-center justify-between gap-2 mb-2">
-          <Logo className="h-6" />
-          <span className={`font-mono text-lg font-bold ${isWarning ? 'timer-warning' : 'text-capgemini-light'}`}>
+          <Logo className="h-6 animate-float-3d" />
+          <span className={`font-mono text-lg font-bold ${isWarning ? 'timer-warning' : 'gradient-text'}`}>
             {formatted}
           </span>
         </div>
@@ -110,7 +110,7 @@ export default function TestPage() {
         </div>
         <div className="h-2 bg-capgemini-border rounded-full overflow-hidden">
           <div
-            className="h-full bg-capgemini transition-all duration-300"
+            className="h-full gradient-bg transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -120,7 +120,7 @@ export default function TestPage() {
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="bg-capgemini-card border border-capgemini-border rounded-2xl p-5 animate-fade-in">
+        <div className="glass border border-capgemini-border rounded-2xl p-5 animate-slide-in-3d card-3d">
           <p className="text-capgemini-light text-sm font-medium mb-2">
             Q{currentIndex + 1} · {question.difficulty} · {question.topic}
           </p>
@@ -139,10 +139,10 @@ export default function TestPage() {
                   type="button"
                   onClick={() => handleSelect(opt)}
                   disabled={submitting}
-                  className={`w-full text-left p-4 rounded-xl border transition-all ${
+                  className={`w-full text-left p-4 rounded-xl border transition-all input-3d ${
                     isSelected
-                      ? 'border-capgemini-light bg-capgemini/20 text-white'
-                      : 'border-capgemini-border bg-capgemini-dark/50 text-slate-300 hover:border-capgemini'
+                      ? 'border-capgemini-light bg-capgemini/20 text-white animate-glow'
+                      : 'border-capgemini-border glass text-slate-300 hover:border-capgemini-light'
                   }`}
                 >
                   <span className="font-bold text-capgemini-light mr-2">{opt}.</span>
@@ -154,7 +154,7 @@ export default function TestPage() {
         </div>
       </main>
 
-      <footer className="p-4 bg-capgemini-card border-t border-capgemini-border shrink-0 flex gap-3">
+      <footer className="p-4 glass border-t border-capgemini-border shrink-0 flex gap-3">
         {!isLast && (
           <Button onClick={handleNext} disabled={!selected || submitting}>
             Next

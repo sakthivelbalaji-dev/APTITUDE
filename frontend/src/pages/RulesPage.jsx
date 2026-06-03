@@ -40,11 +40,11 @@ export default function RulesPage() {
 
   return (
     <PageLayout>
-      <h1 className="text-2xl font-bold text-center mb-6">Test Rules</h1>
+      <h1 className="text-2xl font-bold text-center mb-6 gradient-text animate-scale-3d">Test Rules</h1>
       <Card>
         <ul className="space-y-4 mb-8">
           {RULES.map((rule, i) => (
-            <li key={i} className="flex gap-3 text-slate-300">
+            <li key={i} className="flex gap-3 text-slate-300 animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
               <span className="text-capgemini-light font-bold shrink-0">{i + 1}.</span>
               <span>{rule}</span>
             </li>
@@ -52,7 +52,7 @@ export default function RulesPage() {
         </ul>
 
         {error && (
-          <div className="mb-4 p-3 rounded-lg bg-red-900/30 text-red-300 text-sm">{error}</div>
+          <div className="mb-4 p-3 rounded-lg bg-red-900/30 text-red-300 text-sm animate-fade-in">{error}</div>
         )}
 
         <Button onClick={handleStart} disabled={loading}>

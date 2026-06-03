@@ -63,13 +63,18 @@ export default function ResultsPage() {
               <tr key={r.id} className="border-b border-capgemini-border/50">
                 <td className="py-3">{r.student_name}</td>
                 <td>{r.roll_number}</td>
-                <td>{r.score}/{r.total_questions}</td>
+                <td>{r.score} / {r.total_questions}</td>
                 <td>{r.percentage}%</td>
                 <td>
                   <span className={
                     r.status === 'PASS' ? 'text-green-400' :
                     r.status === 'DISQUALIFIED' ? 'text-red-400' : 'text-amber-400'
                   }>{r.status}</span>
+                  {r.status === 'DISQUALIFIED' && r.disqualification_reason && (
+                    <span className="block text-xs text-red-300 mt-1">
+                      {r.disqualification_reason.replace(/_/g, ' ')}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

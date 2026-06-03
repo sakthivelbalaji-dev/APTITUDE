@@ -34,7 +34,7 @@ export default function HomePage() {
   return (
     <PageLayout>
       <div className="text-center mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
+        <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-3 animate-scale-3d">
           Welcome to the Capgemini Aptitude Assessment Portal
         </h1>
         <p className="text-slate-400 text-sm md:text-base leading-relaxed">
@@ -74,7 +74,7 @@ export default function HomePage() {
           />
 
           {error && (
-            <div className="mb-4 p-4 rounded-xl bg-red-900/30 border border-red-500/50 text-red-300 text-sm">
+            <div className="mb-4 p-4 rounded-xl bg-red-900/30 border border-red-500/50 text-red-300 text-sm animate-fade-in">
               {error}
             </div>
           )}
