@@ -73,5 +73,11 @@ def health_check():
 
 
 # Serve static files from frontend build (must be last)
-if os.path.exists("static"):
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
+static_dir = "static"
+print(f"Checking for static directory: {static_dir}")
+print(f"Static directory exists: {os.path.exists(static_dir)}")
+if os.path.exists(static_dir):
+    print(f"Static directory contents: {os.listdir(static_dir)}")
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+else:
+    print("WARNING: Static directory not found, frontend will not be served")
