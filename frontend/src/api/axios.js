@@ -8,7 +8,9 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('admin_token')
+  const adminToken = localStorage.getItem('admin_token')
+  const studentToken = localStorage.getItem('access_token')
+  const token = adminToken || studentToken
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

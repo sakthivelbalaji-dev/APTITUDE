@@ -2,10 +2,16 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
-class StudentLoginRequest(BaseModel):
+class StudentRegisterRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     department: str = Field(..., min_length=1, max_length=255)
     roll_number: str = Field(..., min_length=1, max_length=100)
+    password: str = Field(..., min_length=6, max_length=100)
+
+
+class StudentLoginRequest(BaseModel):
+    roll_number: str = Field(..., min_length=1, max_length=100)
+    password: str = Field(..., min_length=1, max_length=100)
 
 
 class StudentResponse(BaseModel):
@@ -20,6 +26,8 @@ class StudentResponse(BaseModel):
 
 
 class StudentLoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
     student: StudentResponse
-    already_completed: bool
+    already_completed: bool = False
     message: str | None = None

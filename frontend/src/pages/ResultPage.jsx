@@ -3,19 +3,6 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { PageLayout, Card } from '../components/Layout'
 import { resultApi } from '../api/services'
 
-function StatusBadge({ status }) {
-  const styles = {
-    PASS: 'bg-green-900/40 text-green-400 border-green-500/50 animate-glow',
-    FAIL: 'bg-amber-900/40 text-amber-400 border-amber-500/50',
-    DISQUALIFIED: 'bg-red-900/40 text-red-400 border-red-500/50 animate-glow',
-  }
-  return (
-    <span className={`inline-block px-4 py-2 rounded-full border font-bold ${styles[status] || styles.FAIL}`}>
-      {status}
-    </span>
-  )
-}
-
 export default function ResultPage() {
   const { rollNumber } = useParams()
   const location = useLocation()
@@ -57,18 +44,6 @@ export default function ResultPage() {
       </div>
 
       <Card className="space-y-4">
-        <div className="text-center mb-6">
-          <StatusBadge status={result.status} />
-        </div>
-
-        {result.status === 'DISQUALIFIED' && result.disqualification_reason && (
-          <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4 mb-4 animate-fade-in">
-            <p className="text-red-400 text-sm text-center font-semibold">
-              ⚠️ Disqualified: {result.disqualification_reason.replace(/_/g, ' ')}
-            </p>
-          </div>
-        )}
-
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="glass p-3 rounded-lg input-3d">
             <p className="text-slate-500">Name</p>
@@ -99,10 +74,6 @@ export default function ResultPage() {
             <p className="text-3xl font-bold gradient-text">{result.percentage}%</p>
           </div>
         </div>
-
-        <p className="text-center text-xs text-slate-500 pt-4">
-          Pass criteria: 50% or more
-        </p>
       </Card>
     </PageLayout>
   )

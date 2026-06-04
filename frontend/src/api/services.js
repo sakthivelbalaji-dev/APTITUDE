@@ -1,6 +1,7 @@
 import api from './axios'
 
 export const studentApi = {
+  register: (data) => api.post('/student/register', data),
   login: (data) => api.post('/student/login', data),
 }
 

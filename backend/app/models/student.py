@@ -12,6 +12,7 @@ class Student(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     department: Mapped[str] = mapped_column(String(255), nullable=False)
     roll_number: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     results = relationship("Result", back_populates="student", cascade="all, delete-orphan")

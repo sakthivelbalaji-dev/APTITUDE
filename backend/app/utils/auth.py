@@ -5,8 +5,11 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.database import get_db
+from app.models.student import Student
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
@@ -56,5 +59,32 @@ async def get_current_admin(
         if username is None or role != "admin":
             raise credentials_exception
         return username
+    except JWTError:
+        raise credentials_exception
+
+
+async def get_current_student(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    db: Session = Depends(get_db),
+) -> Student:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(
+            credentials.credentials,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+        student_id: int | None = payload.get("sub")
+        role: str | None = payload.get("role")
+        if student_id is None or role != "student":
+            raise credentials_exception
+        student = db.query(Student).filter(Student.id == student_id).first()
+        if student is None:
+            raise credentials_exception
+        return student
     except JWTError:
         raise credentials_exception

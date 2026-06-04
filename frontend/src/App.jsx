@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { StudentProvider } from './context/StudentContext'
-import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
 import RulesPage from './pages/RulesPage'
 import TestPage from './pages/TestPage'
 import ResultPage from './pages/ResultPage'
@@ -17,7 +17,7 @@ export default function App() {
     <StudentProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<LoginPage />} />
           <Route path="/rules" element={<RulesPage />} />
           <Route path="/test" element={<TestPage />} />
           <Route path="/result" element={<ResultPage />} />

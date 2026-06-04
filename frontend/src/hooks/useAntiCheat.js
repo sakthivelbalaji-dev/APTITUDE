@@ -18,10 +18,14 @@ export function useAntiCheat(onViolation, enabled = true) {
     if (!enabled) return
 
     const handleVisibility = () => {
-      if (document.hidden) disqualify('TAB_SWITCH_DETECTED')
+      if (document.hidden) {
+        disqualify('TAB_SWITCH_DETECTED')
+      }
     }
 
-    const handleBlur = () => disqualify('TAB_SWITCH_DETECTED')
+    const handleBlur = () => {
+      disqualify('TAB_SWITCH_DETECTED')
+    }
 
     // Detect Print Screen key
     const handleKeyDown = (e) => {
