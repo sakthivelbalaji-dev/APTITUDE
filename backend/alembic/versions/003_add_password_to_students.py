@@ -21,8 +21,9 @@ def upgrade() -> None:
     
     # Set a default password for existing students (they will need to reset it)
     # Using a temporary default password "changeme123"
-    from app.utils.auth import get_password_hash
-    default_password = get_password_hash("changeme123")
+    # Note: This is a placeholder - in production, users should reset their passwords
+    import hashlib
+    default_password = hashlib.sha256("changeme123".encode()).hexdigest()
     op.execute(f"UPDATE students SET password = '{default_password}' WHERE password IS NULL")
     
     # Make password non-nullable
