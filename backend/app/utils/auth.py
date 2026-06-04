@@ -20,7 +20,9 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    # Truncate password to 72 bytes (bcrypt limitation)
+    password_bytes = password.encode('utf-8')[:72]
+    return pwd_context.hash(password_bytes.decode('utf-8', errors='ignore'))
 
 
 def create_access_token(data: dict) -> str:
