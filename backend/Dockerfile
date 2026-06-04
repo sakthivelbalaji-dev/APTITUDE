@@ -9,5 +9,5 @@ COPY backend/ .
 
 EXPOSE 8000
 
-# Run Alembic migrations before starting the app
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Ensure database schema is correct before starting the app
+CMD ["sh", "-c", "python ensure_schema.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
