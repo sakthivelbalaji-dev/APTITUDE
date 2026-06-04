@@ -26,4 +26,5 @@ COPY --from=frontend-build /app/frontend/dist ./static
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Run migrations, seed database, and start the app
+CMD ["sh", "-c", "alembic upgrade head && python -c 'from app.seed import seed_database; seed_database()' && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
