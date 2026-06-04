@@ -10,7 +10,19 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const adminToken = localStorage.getItem('admin_token')
   const studentToken = localStorage.getItem('access_token')
-  const token = adminToken || studentToken
+  
+  let token = null
+  if (
+    config.url.startsWith('/admin') ||
+    config.url.startsWith('/results') ||
+    config.url.startsWith('/students') ||
+    config.url.startsWith('/questions')
+  ) {
+    token = adminToken
+  } else {
+    token = studentToken
+  }
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

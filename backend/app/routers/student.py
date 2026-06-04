@@ -31,7 +31,7 @@ def student_register(payload: StudentRegisterRequest, db: Session = Depends(get_
         db.commit()
         db.refresh(student)
 
-        access_token = create_access_token(data={"sub": student.id, "role": "student"})
+        access_token = create_access_token(data={"sub": str(student.id), "role": "student"})
         return StudentLoginResponse(
             access_token=access_token,
             student=StudentResponse.model_validate(student),
@@ -68,7 +68,7 @@ def student_login(payload: StudentLoginRequest, db: Session = Depends(get_db)):
         )
 
     if is_test_completed(db, student.id):
-        access_token = create_access_token(data={"sub": student.id, "role": "student"})
+        access_token = create_access_token(data={"sub": str(student.id), "role": "student"})
         return StudentLoginResponse(
             access_token=access_token,
             student=StudentResponse.model_validate(student),
@@ -76,7 +76,7 @@ def student_login(payload: StudentLoginRequest, db: Session = Depends(get_db)):
             message="You have already attempted the test.",
         )
 
-    access_token = create_access_token(data={"sub": student.id, "role": "student"})
+    access_token = create_access_token(data={"sub": str(student.id), "role": "student"})
     return StudentLoginResponse(
         access_token=access_token,
         student=StudentResponse.model_validate(student),

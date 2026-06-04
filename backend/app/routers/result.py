@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 import csv
 import io
 
+from app.config import settings
 from app.database import get_db
 from app.models.result import Result
 from app.models.student import Student
@@ -11,6 +14,41 @@ from app.schemas.result import DashboardStats, ResultResponse
 from app.utils.auth import get_current_admin
 
 router = APIRouter(tags=["Results"])
+security = HTTPBearer()
+
+
+def verify_student_or_admin(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(
+            credentials.credentials,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+        role = payload.get("role")
+        sub = payload.get("sub")
+        if role == "admin":
+            return {"role": "admin", "username": sub}
+        elif role == "student":
+            try:
+                student_id = int(sub)
+            except (ValueError, TypeError):
+                raise credentials_exception
+            student = db.query(Student).filter(Student.id == student_id).first()
+            if student is None:
+                raise credentials_exception
+            return {"role": "student", "student": student}
+        else:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
 
 
 def _result_to_response(result: Result, student: Student) -> ResultResponse:
@@ -33,7 +71,17 @@ def _result_to_response(result: Result, student: Student) -> ResultResponse:
 
 
 @router.get("/result/{roll_number}", response_model=ResultResponse)
-def get_result_by_roll(roll_number: str, db: Session = Depends(get_db)):
+def get_result_by_roll(
+    roll_number: str,
+    db: Session = Depends(get_db),
+    auth_user: dict = Depends(verify_student_or_admin)
+):
+    if auth_user["role"] == "student" and auth_user["student"].roll_number != roll_number:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to view another student's result."
+        )
+
     student = db.query(Student).filter(Student.roll_number == roll_number).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
@@ -51,7 +99,17 @@ def get_result_by_roll(roll_number: str, db: Session = Depends(get_db)):
 
 
 @router.get("/result/{roll_number}/history", response_model=list[ResultResponse])
-def get_student_history(roll_number: str, db: Session = Depends(get_db)):
+def get_student_history(
+    roll_number: str,
+    db: Session = Depends(get_db),
+    auth_user: dict = Depends(verify_student_or_admin)
+):
+    if auth_user["role"] == "student" and auth_user["student"].roll_number != roll_number:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to view another student's history."
+        )
+
     student = db.query(Student).filter(Student.roll_number == roll_number).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")

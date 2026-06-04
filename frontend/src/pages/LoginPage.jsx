@@ -34,6 +34,9 @@ export default function LoginPage() {
       const { data } = await endpoint(payload)
       
       localStorage.setItem('access_token', data.access_token)
+      if (data.student && data.student.roll_number) {
+        sessionStorage.setItem('last_roll', data.student.roll_number)
+      }
       
       if (data.already_completed) {
         setError(data.message || 'You have already attempted the test.')

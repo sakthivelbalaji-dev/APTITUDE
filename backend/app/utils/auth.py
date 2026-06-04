@@ -103,10 +103,15 @@ async def get_current_student(
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
-        student_id: int | None = payload.get("sub")
+        sub = payload.get("sub")
         role: str | None = payload.get("role")
-        if student_id is None or role != "student":
-            print(f"Invalid token payload: student_id={student_id}, role={role}")
+        if sub is None or role != "student":
+            print(f"Invalid token payload: sub={sub}, role={role}")
+            raise credentials_exception
+        try:
+            student_id = int(sub)
+        except (ValueError, TypeError):
+            print(f"Invalid student id format in token sub: {sub}")
             raise credentials_exception
         student = db.query(Student).filter(Student.id == student_id).first()
         if student is None:
