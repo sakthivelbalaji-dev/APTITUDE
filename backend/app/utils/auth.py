@@ -20,25 +20,39 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def get_password_hash(password: str) -> str:
-    # Truncate password to 72 bytes (bcrypt limitation)
+    # Debug logging
+    print("Password value:", repr(password))
+    print("Password length:", len(password))
+    print("Password byte length:", len(password.encode("utf-8")))
+    
+    # Validate password is a string
+    if not isinstance(password, str):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid password format. Password must be a string."
+        )
+    
+    # Validate password byte length before hashing
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at most 72 characters."
+        )
+    
+    # Hash the password directly (bcrypt handles 72-byte limit internally)
     try:
-        # Convert to bytes and truncate to exactly 72 bytes
-        password_bytes = password.encode('utf-8')
-        if len(password_bytes) > 72:
-            password_bytes = password_bytes[:72]
-            print(f"Password truncated from {len(password.encode('utf-8'))} to 72 bytes")
-        # Decode back to string, ignoring any errors
-        truncated_password = password_bytes.decode('utf-8', errors='ignore')
-        print(f"Hashing password (length: {len(truncated_password)} chars)")
-        return pwd_context.hash(truncated_password)
+        hashed = pwd_context.hash(password)
+        print("Password hashed successfully")
+        return hashed
     except Exception as e:
         print(f"Error hashing password: {e}")
         import traceback
         print(f"Traceback: {traceback.format_exc()}")
-        # Fallback: use a simple truncation
-        truncated = password[:72]
-        print(f"Using fallback truncation (length: {len(truncated)} chars)")
-        return pwd_context.hash(truncated)
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid password format."
+        )
 
 
 def create_access_token(data: dict) -> str:

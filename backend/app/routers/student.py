@@ -20,6 +20,14 @@ def student_register(payload: StudentRegisterRequest, db: Session = Depends(get_
                 detail="Student with this roll number already exists"
             )
 
+        # Additional validation for password byte length
+        password_bytes = payload.password.encode('utf-8')
+        if len(password_bytes) > 72:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password must be at most 72 characters."
+            )
+
         hashed_password = get_password_hash(payload.password)
         student = Student(
             name=payload.name,
@@ -47,7 +55,7 @@ def student_register(payload: StudentRegisterRequest, db: Session = Depends(get_
         print(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Registration failed: {str(e)}"
+            detail="Registration failed. Please try again."
         )
 
 
