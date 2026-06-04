@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage'
 import RulesPage from './pages/RulesPage'
 import TestPage from './pages/TestPage'
 import ResultPage from './pages/ResultPage'
+import ProfilePage from './pages/ProfilePage'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminLayout from './pages/admin/AdminLayout'
 import Dashboard from './pages/admin/Dashboard'
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/test" element={<TestPage />} />
           <Route path="/result" element={<ResultPage />} />
           <Route path="/result/:rollNumber" element={<ResultPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin">
             <Route index element={<AdminLogin />} />
             <Route element={<AdminLayout />}>

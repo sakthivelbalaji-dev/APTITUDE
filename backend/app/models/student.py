@@ -14,5 +14,5 @@ class Student(Base):
     roll_number: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    result = relationship("Result", back_populates="student", uselist=False)
-    answers = relationship("Answer", back_populates="student")
+    results = relationship("Result", back_populates="student", cascade="all, delete-orphan")
+    answers = relationship("Answer", back_populates="student", cascade="all, delete-orphan")

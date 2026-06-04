@@ -83,6 +83,16 @@ export default function HomePage() {
             {loading ? 'Validating...' : 'Continue to Rules'}
           </Button>
         </form>
+
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => navigate('/profile')}
+            className="text-capgemini-light text-sm hover:underline"
+          >
+            View My Profile
+          </button>
+        </div>
       </Card>
     </PageLayout>
   )

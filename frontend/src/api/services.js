@@ -20,6 +20,7 @@ export const testApi = {
 
 export const resultApi = {
   getByRoll: (rollNumber) => api.get(`/result/${rollNumber}`),
+  getHistory: (rollNumber) => api.get(`/result/${rollNumber}/history`),
 }
 
 export const adminApi = {

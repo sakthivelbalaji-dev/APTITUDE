@@ -16,6 +16,8 @@ class ResultResponse(BaseModel):
     disqualification_reason: str | None = None
     submitted_at: datetime | None = None
     total_questions: int = 30
+    attempt_number: int = 1
+    created_at: datetime | None = None
 
     class Config:
         from_attributes = True

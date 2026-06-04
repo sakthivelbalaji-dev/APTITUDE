@@ -28,12 +28,21 @@ def get_test_questions(db: Session) -> list[Question]:
 
 
 def ensure_result_record(db: Session, student_id: int) -> Result:
-    result = db.query(Result).filter(Result.student_id == student_id).first()
-    if not result:
-        result = Result(student_id=student_id, status="IN_PROGRESS")
-        db.add(result)
-        db.commit()
-        db.refresh(result)
+    # Get the latest attempt number for this student
+    latest_result = db.query(Result).filter(
+        Result.student_id == student_id
+    ).order_by(Result.attempt_number.desc()).first()
+    
+    next_attempt = (latest_result.attempt_number + 1) if latest_result else 1
+    
+    result = Result(
+        student_id=student_id, 
+        status="IN_PROGRESS",
+        attempt_number=next_attempt
+    )
+    db.add(result)
+    db.commit()
+    db.refresh(result)
     return result
 
 
@@ -107,5 +116,9 @@ def calculate_and_submit(
 
 
 def is_test_completed(db: Session, student_id: int) -> bool:
-    result = db.query(Result).filter(Result.student_id == student_id).first()
-    return result is not None and result.submitted_at is not None
+    # Check if there's an incomplete test (IN_PROGRESS status)
+    incomplete_result = db.query(Result).filter(
+        Result.student_id == student_id,
+        Result.status == "IN_PROGRESS"
+    ).first()
+    return incomplete_result is None

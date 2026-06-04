@@ -9,7 +9,8 @@ class Result(Base):
     __tablename__ = "results"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("students.id"), unique=True, nullable=False)
+    student_id: Mapped[int] = mapped_column(ForeignKey("students.id"), nullable=False, index=True)
+    attempt_number: Mapped[int] = mapped_column(Integer, default=1)
     score: Mapped[int] = mapped_column(Integer, default=0)
     correct_answers: Mapped[int] = mapped_column(Integer, default=0)
     wrong_answers: Mapped[int] = mapped_column(Integer, default=0)
@@ -17,5 +18,6 @@ class Result(Base):
     status: Mapped[str] = mapped_column(String(20), default="IN_PROGRESS")  # PASS, FAIL, DISQUALIFIED, IN_PROGRESS
     disqualification_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    student = relationship("Student", back_populates="result")
+    student = relationship("Student", back_populates="results")

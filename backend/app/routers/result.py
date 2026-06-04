@@ -28,6 +28,7 @@ def _result_to_response(result: Result, student: Student) -> ResultResponse:
         disqualification_reason=result.disqualification_reason,
         submitted_at=result.submitted_at,
         total_questions=30,
+        attempt_number=result.attempt_number,
     )
 
 
@@ -37,11 +38,30 @@ def get_result_by_roll(roll_number: str, db: Session = Depends(get_db)):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
-    result = db.query(Result).filter(Result.student_id == student.id).first()
-    if not result or not result.submitted_at:
+    # Get the latest completed result
+    result = db.query(Result).filter(
+        Result.student_id == student.id,
+        Result.submitted_at.isnot(None)
+    ).order_by(Result.submitted_at.desc()).first()
+    
+    if not result:
         raise HTTPException(status_code=404, detail="Result not found")
 
     return _result_to_response(result, student)
+
+
+@router.get("/result/{roll_number}/history", response_model=list[ResultResponse])
+def get_student_history(roll_number: str, db: Session = Depends(get_db)):
+    student = db.query(Student).filter(Student.roll_number == roll_number).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    results = db.query(Result).filter(
+        Result.student_id == student.id,
+        Result.submitted_at.isnot(None)
+    ).order_by(Result.submitted_at.desc()).all()
+
+    return [_result_to_response(r, student) for r in results]
 
 
 @router.get("/results", response_model=list[ResultResponse])
