@@ -1,11 +1,13 @@
 import os
 import sys
 import traceback
+import hashlib
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import inspect, text
 
 from app.config import settings
 from app.database import Base, engine
@@ -20,13 +22,48 @@ print(f"DATABASE_URL: {settings.DATABASE_URL[:20]}..." if settings.DATABASE_URL 
 print("=" * 50)
 
 
+def ensure_password_column():
+    """Ensure the password column exists in the students table"""
+    try:
+        inspector = inspect(engine)
+        columns = [col['name'] for col in inspector.get_columns('students')]
+        print(f"Existing columns in students table: {columns}")
+
+        if 'password' not in columns:
+            print("Password column missing. Adding it...")
+            with engine.connect() as conn:
+                # Add password column as nullable first
+                conn.execute(text("ALTER TABLE students ADD COLUMN password VARCHAR(255)"))
+                conn.commit()
+
+                # Set a default password for existing students
+                default_password = hashlib.sha256("changeme123".encode()).hexdigest()
+                conn.execute(text(f"UPDATE students SET password = '{default_password}' WHERE password IS NULL"))
+                conn.commit()
+
+                # Make password non-nullable (PostgreSQL requires this to be done separately)
+                conn.execute(text("ALTER TABLE students ALTER COLUMN password SET NOT NULL"))
+                conn.commit()
+
+            print("Password column added successfully")
+        else:
+            print("Password column already exists")
+    except Exception as e:
+        print(f"Error ensuring password column: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
         print("Creating database tables...")
         Base.metadata.create_all(bind=engine)
         print("Database tables created successfully")
-        
+
+        print("Ensuring password column exists...")
+        ensure_password_column()
+        print("Password column check completed")
+
         print("Seeding database...")
         seed_database()
         print("Database seeded successfully")
@@ -34,7 +71,7 @@ async def lifespan(app: FastAPI):
         print(f"ERROR during database initialization: {e}")
         print(f"Traceback: {traceback.format_exc()}")
         print("Application will start anyway, but database operations may fail")
-    
+
     print("FastAPI application started successfully")
     yield
 
