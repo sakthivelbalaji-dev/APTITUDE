@@ -22,13 +22,23 @@ def verify_password(plain: str, hashed: str) -> bool:
 def get_password_hash(password: str) -> str:
     # Truncate password to 72 bytes (bcrypt limitation)
     try:
-        password_bytes = password.encode('utf-8')[:72]
+        # Convert to bytes and truncate to exactly 72 bytes
+        password_bytes = password.encode('utf-8')
+        if len(password_bytes) > 72:
+            password_bytes = password_bytes[:72]
+            print(f"Password truncated from {len(password.encode('utf-8'))} to 72 bytes")
+        # Decode back to string, ignoring any errors
         truncated_password = password_bytes.decode('utf-8', errors='ignore')
+        print(f"Hashing password (length: {len(truncated_password)} chars)")
         return pwd_context.hash(truncated_password)
     except Exception as e:
         print(f"Error hashing password: {e}")
-        # Fallback: hash the original password if truncation fails
-        return pwd_context.hash(password[:72])
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        # Fallback: use a simple truncation
+        truncated = password[:72]
+        print(f"Using fallback truncation (length: {len(truncated)} chars)")
+        return pwd_context.hash(truncated)
 
 
 def create_access_token(data: dict) -> str:
