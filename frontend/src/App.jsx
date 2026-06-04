@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { StudentProvider } from './context/StudentContext'
 import LoginPage from './pages/LoginPage'
 import RulesPage from './pages/RulesPage'
@@ -15,7 +15,7 @@ import ResultsPage from './pages/admin/ResultsPage'
 export default function App() {
   return (
     <StudentProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/rules" element={<RulesPage />} />
@@ -34,7 +34,7 @@ export default function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </StudentProvider>
   )
 }
