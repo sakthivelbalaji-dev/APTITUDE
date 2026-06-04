@@ -21,15 +21,32 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     # Truncate password to 72 bytes (bcrypt limitation)
-    password_bytes = password.encode('utf-8')[:72]
-    return pwd_context.hash(password_bytes.decode('utf-8', errors='ignore'))
+    try:
+        password_bytes = password.encode('utf-8')[:72]
+        truncated_password = password_bytes.decode('utf-8', errors='ignore')
+        return pwd_context.hash(truncated_password)
+    except Exception as e:
+        print(f"Error hashing password: {e}")
+        # Fallback: hash the original password if truncation fails
+        return pwd_context.hash(password[:72])
 
 
 def create_access_token(data: dict) -> str:
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    try:
+        to_encode = data.copy()
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        to_encode.update({"exp": expire})
+        encoded = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        print(f"Token created successfully for user: {data.get('sub')}")
+        return encoded
+    except Exception as e:
+        print(f"Error creating access token: {e}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create access token"
+        )
 
 
 def get_admin_password_hash() -> str:
@@ -59,9 +76,15 @@ async def get_current_admin(
         username: str | None = payload.get("sub")
         role: str | None = payload.get("role")
         if username is None or role != "admin":
+            print(f"Invalid token payload: username={username}, role={role}")
             raise credentials_exception
+        print(f"Admin authenticated successfully: {username}")
         return username
-    except JWTError:
+    except JWTError as e:
+        print(f"JWT error in get_current_admin: {e}")
+        raise credentials_exception
+    except Exception as e:
+        print(f"Unexpected error in get_current_admin: {e}")
         raise credentials_exception
 
 
@@ -83,10 +106,17 @@ async def get_current_student(
         student_id: int | None = payload.get("sub")
         role: str | None = payload.get("role")
         if student_id is None or role != "student":
+            print(f"Invalid token payload: student_id={student_id}, role={role}")
             raise credentials_exception
         student = db.query(Student).filter(Student.id == student_id).first()
         if student is None:
+            print(f"Student not found with id: {student_id}")
             raise credentials_exception
+        print(f"Student authenticated successfully: {student.roll_number}")
         return student
-    except JWTError:
+    except JWTError as e:
+        print(f"JWT error in get_current_student: {e}")
+        raise credentials_exception
+    except Exception as e:
+        print(f"Unexpected error in get_current_student: {e}")
         raise credentials_exception
