@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.question import Question
 from app.schemas.question import QuestionCreate, QuestionResponse, QuestionUpdate
-from app.utils.auth import get_current_admin
 
 router = APIRouter(prefix="/questions", tags=["Questions"])
 
@@ -12,7 +11,6 @@ router = APIRouter(prefix="/questions", tags=["Questions"])
 @router.get("", response_model=list[QuestionResponse])
 def list_questions(
     db: Session = Depends(get_db),
-    _: str = Depends(get_current_admin),
     difficulty: str | None = None,
     topic: str | None = None,
 ):
@@ -28,7 +26,6 @@ def list_questions(
 def create_question(
     payload: QuestionCreate,
     db: Session = Depends(get_db),
-    _: str = Depends(get_current_admin),
 ):
     question = Question(**payload.model_dump())
     db.add(question)
@@ -42,7 +39,6 @@ def update_question(
     question_id: int,
     payload: QuestionUpdate,
     db: Session = Depends(get_db),
-    _: str = Depends(get_current_admin),
 ):
     question = db.query(Question).filter(Question.id == question_id).first()
     if not question:
@@ -60,7 +56,6 @@ def update_question(
 def delete_question(
     question_id: int,
     db: Session = Depends(get_db),
-    _: str = Depends(get_current_admin),
 ):
     question = db.query(Question).filter(Question.id == question_id).first()
     if not question:
@@ -74,7 +69,6 @@ def delete_question(
 def bulk_import_questions(
     questions: list[QuestionCreate],
     db: Session = Depends(get_db),
-    _: str = Depends(get_current_admin),
 ):
     count = 0
     for q in questions:

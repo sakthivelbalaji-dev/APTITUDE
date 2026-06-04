@@ -6,7 +6,6 @@ from app.models.result import Result
 from app.models.student import Student
 from app.schemas.result import ResultResponse
 from app.schemas.student import StudentResponse
-from app.utils.auth import get_current_admin
 from app.routers.result import _result_to_response
 
 router = APIRouter(prefix="/students", tags=["Students Admin"])
@@ -15,7 +14,6 @@ router = APIRouter(prefix="/students", tags=["Students Admin"])
 @router.get("", response_model=list[StudentResponse])
 def list_students(
     db: Session = Depends(get_db),
-    _: str = Depends(get_current_admin),
     search: str | None = None,
     department: str | None = None,
 ):
@@ -34,7 +32,6 @@ def list_students(
 def get_student_result(
     student_id: int,
     db: Session = Depends(get_db),
-    _: str = Depends(get_current_admin),
 ):
     student = db.query(Student).filter(Student.id == student_id).first()
     if not student:

@@ -1,50 +1,59 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import os
+import uuid
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.student import Student
-from app.schemas.student import StudentRegisterRequest, StudentLoginRequest, StudentLoginResponse, StudentResponse
-from app.services.test_service import is_test_completed
-from app.utils.auth import verify_password, get_password_hash, create_access_token
+from app.schemas.student import StudentRegisterRequest, StudentResponse
 
 router = APIRouter(prefix="/student", tags=["Student"])
 
+# Create uploads directory if it doesn't exist
+UPLOAD_DIR = "uploads/resumes"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@router.post("/register", response_model=StudentLoginResponse)
-def student_register(payload: StudentRegisterRequest, db: Session = Depends(get_db)):
+
+@router.post("/register", response_model=StudentResponse)
+def student_register(
+    name: str,
+    department: str,
+    roll_number: str,
+    resume: UploadFile = File(None),
+    db: Session = Depends(get_db)
+):
     try:
-        existing_student = db.query(Student).filter(Student.roll_number == payload.roll_number).first()
+        existing_student = db.query(Student).filter(Student.roll_number == roll_number).first()
         if existing_student:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Student with this roll number already exists"
             )
 
-        # Additional validation for password byte length
-        password_bytes = payload.password.encode('utf-8')
-        if len(password_bytes) > 72:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Password must be at most 72 characters."
-            )
+        # Handle resume upload
+        resume_path = None
+        if resume:
+            # Generate unique filename
+            file_extension = os.path.splitext(resume.filename)[1]
+            unique_filename = f"{uuid.uuid4()}{file_extension}"
+            resume_path = os.path.join(UPLOAD_DIR, unique_filename)
+            
+            # Save file
+            with open(resume_path, "wb") as buffer:
+                content = resume.file.read()
+                buffer.write(content)
 
-        hashed_password = get_password_hash(payload.password)
         student = Student(
-            name=payload.name,
-            department=payload.department,
-            roll_number=payload.roll_number,
-            password=hashed_password,
+            name=name,
+            department=department,
+            roll_number=roll_number,
+            resume_path=resume_path,
         )
         db.add(student)
         db.commit()
         db.refresh(student)
 
-        access_token = create_access_token(data={"sub": str(student.id), "role": "student"})
-        return StudentLoginResponse(
-            access_token=access_token,
-            student=StudentResponse.model_validate(student),
-            already_completed=False,
-        )
+        return StudentResponse.model_validate(student)
     except HTTPException:
         raise
     except Exception as e:
@@ -57,36 +66,3 @@ def student_register(payload: StudentRegisterRequest, db: Session = Depends(get_
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Registration failed. Please try again."
         )
-
-
-@router.post("/login", response_model=StudentLoginResponse)
-def student_login(payload: StudentLoginRequest, db: Session = Depends(get_db)):
-    student = db.query(Student).filter(Student.roll_number == payload.roll_number).first()
-
-    if not student:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid roll number or password"
-        )
-
-    if not verify_password(payload.password, student.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid roll number or password"
-        )
-
-    if is_test_completed(db, student.id):
-        access_token = create_access_token(data={"sub": str(student.id), "role": "student"})
-        return StudentLoginResponse(
-            access_token=access_token,
-            student=StudentResponse.model_validate(student),
-            already_completed=True,
-            message="You have already attempted the test.",
-        )
-
-    access_token = create_access_token(data={"sub": str(student.id), "role": "student"})
-    return StudentLoginResponse(
-        access_token=access_token,
-        student=StudentResponse.model_validate(student),
-        already_completed=False,
-    )

@@ -7,12 +7,11 @@ import { useStudent } from '../context/StudentContext'
 export default function LoginPage() {
   const navigate = useNavigate()
   const { setStudent } = useStudent()
-  const [isLogin, setIsLogin] = useState(true)
   const [form, setForm] = useState({
-    roll_number: '',
-    password: '',
     name: '',
     department: '',
+    roll_number: '',
+    resume: null,
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -22,32 +21,20 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const endpoint = isLogin ? studentApi.login : studentApi.register
-      const payload = isLogin
-        ? { roll_number: form.roll_number, password: form.password }
-        : {
-            name: form.name,
-            department: form.department,
-            roll_number: form.roll_number,
-            password: form.password,
-          }
-      const { data } = await endpoint(payload)
-      
-      localStorage.setItem('access_token', data.access_token)
-      if (data.student && data.student.roll_number) {
-        sessionStorage.setItem('last_roll', data.student.roll_number)
+      const formData = new FormData()
+      formData.append('name', form.name)
+      formData.append('department', form.department)
+      formData.append('roll_number', form.roll_number)
+      if (form.resume) {
+        formData.append('resume', form.resume)
       }
+
+      const { data } = await studentApi.register(formData)
       
-      if (data.already_completed) {
-        setError(data.message || 'You have already attempted the test.')
-        setLoading(false)
-        return
-      }
-      
-      setStudent(data.student)
+      setStudent(data)
       navigate('/rules')
     } catch (err) {
-      setError(err.response?.data?.detail || (isLogin ? 'Login failed. Please check your credentials.' : 'Registration failed. Please try again.'))
+      setError(err.response?.data?.detail || 'Registration failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -57,35 +44,29 @@ export default function LoginPage() {
     <PageLayout>
       <div className="text-center mb-8">
         <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-3 animate-scale-3d">
-          {isLogin ? 'Login' : 'Register'}
+          Student Registration
         </h1>
         <p className="text-slate-400 text-sm md:text-base leading-relaxed">
-          {isLogin
-            ? 'Enter your credentials to access the Capgemini Aptitude Assessment.'
-            : 'Create your account to participate in the Capgemini Aptitude Assessment.'}
+          Register to participate in the Capgemini Aptitude Assessment.
         </p>
       </div>
 
       <Card>
         <form onSubmit={handleSubmit}>
-          {!isLogin && (
-            <>
-              <Input
-                label="Full Name"
-                placeholder="Enter your full name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
-              />
-              <Input
-                label="Department"
-                placeholder="e.g. Computer Science"
-                value={form.department}
-                onChange={(e) => setForm({ ...form, department: e.target.value })}
-                required
-              />
-            </>
-          )}
+          <Input
+            label="Full Name"
+            placeholder="Enter your full name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
+          <Input
+            label="Department"
+            placeholder="e.g. Computer Science"
+            value={form.department}
+            onChange={(e) => setForm({ ...form, department: e.target.value })}
+            required
+          />
           <Input
             label="Roll Number"
             placeholder="Enter your roll number"
@@ -93,14 +74,17 @@ export default function LoginPage() {
             onChange={(e) => setForm({ ...form, roll_number: e.target.value })}
             required
           />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Enter your password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            required
-          />
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Resume (PDF, DOC, DOCX)
+            </label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => setForm({ ...form, resume: e.target.files[0] })}
+              className="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-300 focus:outline-none focus:ring-2 focus:ring-capgemini-light"
+            />
+          </div>
 
           {error && (
             <div className="mb-4 p-4 rounded-xl bg-red-900/30 border border-red-500/50 text-red-300 text-sm animate-fade-in">
@@ -109,35 +93,19 @@ export default function LoginPage() {
           )}
 
           <Button type="submit" disabled={loading}>
-            {loading ? 'Processing...' : isLogin ? 'Login' : 'Register'}
+            {loading ? 'Processing...' : 'Register'}
           </Button>
         </form>
 
         <div className="mt-4 text-center">
           <button
             type="button"
-            onClick={() => {
-              setIsLogin(!isLogin)
-              setError('')
-              setForm({ roll_number: '', password: '', name: '', department: '' })
-            }}
+            onClick={() => navigate('/profile')}
             className="text-capgemini-light text-sm hover:underline"
           >
-            {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
+            View My Profile
           </button>
         </div>
-
-        {isLogin && (
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => navigate('/profile')}
-              className="text-capgemini-light text-sm hover:underline"
-            >
-              View My Profile
-            </button>
-          </div>
-        )}
       </Card>
     </PageLayout>
   )

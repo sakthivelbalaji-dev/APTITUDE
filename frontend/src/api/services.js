@@ -1,8 +1,11 @@
 import api from './axios'
 
 export const studentApi = {
-  register: (data) => api.post('/student/register', data),
-  login: (data) => api.post('/student/login', data),
+  register: (formData) => api.post('/student/register', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
 }
 
 export const testApi = {

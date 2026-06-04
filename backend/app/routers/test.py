@@ -8,7 +8,6 @@ from app.schemas.question import QuestionPublicResponse
 from app.schemas.test import SaveAnswerRequest, SubmitTestRequest, TestStartRequest, TestStartResponse
 from app.schemas.result import ResultResponse
 from app.services import test_service
-from app.utils.auth import get_current_student
 
 router = APIRouter(prefix="/test", tags=["Test"])
 
@@ -19,14 +18,8 @@ _test_sessions: dict[int, list[int]] = {}
 @router.post("/start", response_model=TestStartResponse)
 def start_test(
     payload: TestStartRequest,
-    db: Session = Depends(get_db),
-    current_student: Student = Depends(get_current_student)
+    db: Session = Depends(get_db)
 ):
-    if payload.student_id != current_student.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to start the test for another student."
-        )
     student = db.query(Student).filter(Student.id == payload.student_id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
@@ -57,14 +50,8 @@ def start_test(
 @router.post("/save-answer")
 def save_answer(
     payload: SaveAnswerRequest,
-    db: Session = Depends(get_db),
-    current_student: Student = Depends(get_current_student)
+    db: Session = Depends(get_db)
 ):
-    if payload.student_id != current_student.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to save answers for another student."
-        )
     student = db.query(Student).filter(Student.id == payload.student_id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
@@ -81,14 +68,8 @@ def save_answer(
 @router.post("/submit", response_model=ResultResponse)
 def submit_test(
     payload: SubmitTestRequest,
-    db: Session = Depends(get_db),
-    current_student: Student = Depends(get_current_student)
+    db: Session = Depends(get_db)
 ):
-    if payload.student_id != current_student.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to submit the test for another student."
-        )
     student = db.query(Student).filter(Student.id == payload.student_id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
