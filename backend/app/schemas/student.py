@@ -6,7 +6,7 @@ class StudentRegisterRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     department: str = Field(..., min_length=1, max_length=255)
     roll_number: str = Field(..., min_length=1, max_length=100)
-    password: str = Field(..., min_length=6, max_length=100)
+    password: str = Field(..., min_length=1, max_length=100)
 
 
 class StudentLoginRequest(BaseModel):

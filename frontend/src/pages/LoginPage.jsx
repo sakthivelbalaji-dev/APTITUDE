@@ -97,7 +97,6 @@ export default function LoginPage() {
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required
-            minLength={6}
           />
 
           {error && (
