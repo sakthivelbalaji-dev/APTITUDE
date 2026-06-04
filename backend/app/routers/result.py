@@ -9,6 +9,7 @@ from app.database import get_db
 from app.models.result import Result
 from app.models.student import Student
 from app.schemas.result import DashboardStats, ResultResponse
+from app.utils.auth import get_current_admin
 
 router = APIRouter(tags=["Results"])
 
