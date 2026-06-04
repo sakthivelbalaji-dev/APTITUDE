@@ -11,6 +11,9 @@ COPY frontend/ .
 ENV VITE_API_URL=""
 RUN npm run build
 
+# Verify build output
+RUN ls -la dist/
+
 # Build backend with frontend static files
 FROM python:3.12-slim
 
@@ -23,6 +26,9 @@ COPY backend/ .
 
 # Copy frontend build to backend static directory
 COPY --from=frontend-build /app/frontend/dist ./static
+
+# Verify static files were copied
+RUN ls -la static/
 
 EXPOSE 8000
 

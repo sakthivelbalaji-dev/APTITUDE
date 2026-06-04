@@ -20,6 +20,7 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    console.log('Starting registration...', form)
     try {
       const formData = new FormData()
       formData.append('name', form.name)
@@ -29,11 +30,15 @@ export default function LoginPage() {
         formData.append('resume', form.resume)
       }
 
+      console.log('Sending registration request...')
       const { data } = await studentApi.register(formData)
+      console.log('Registration successful:', data)
       
       setStudent(data)
+      console.log('Navigating to /rules...')
       navigate('/rules')
     } catch (err) {
+      console.error('Registration error:', err)
       setError(err.response?.data?.detail || 'Registration failed. Please try again.')
     } finally {
       setLoading(false)
